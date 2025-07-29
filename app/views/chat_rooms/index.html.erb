@@ -1,0 +1,12 @@
+<div class="container mt-4">
+  <h2>Chat Rooms</h2>
+  <ul class="list-group">
+    <% @chat_rooms.each do |room| %>
+      <li class="list-group-item">
+        <%= link_to room.name, chat_room_path(room) %>
+      </li>
+    <% end %>
+  </ul>
+
+  <%= link_to "New Room", new_chat_room_path, class: "btn btn-success mt-3" %>
+</div>

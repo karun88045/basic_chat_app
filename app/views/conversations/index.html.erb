@@ -1,0 +1,48 @@
+<div class="container py-4">
+  <div class="card shadow-sm rounded-4">
+    <div class="card-header bg-primary text-white rounded-top-4">
+      <h4 class="mb-0">💬 Start a Chat</h4>
+    </div>
+
+    <div class="card-body p-0">
+      <ul id="online-users" class="list-group list-group-flush">
+        <% @users.each do |user| %>
+          <li class="list-group-item d-flex justify-content-between align-items-center" id="user-<%= user.email.gsub(/[@.]/, '-') %>">
+            <span>
+              <span class="user-status me-2">🔘</span> <!-- default = offline -->
+              <%= user.email %>
+            </span>
+            <%= button_to "Chat", conversations_path(receiver_id: user.id), method: :post, class: "btn btn-sm btn-outline-primary" %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const list = document.getElementById("online-users")
+
+    const updateUserStatus = (email, status) => {
+      const id = `user-${email.replace(/[@.]/g, '-')}`
+      const item = document.getElementById(id)
+      if (item) {
+        const icon = item.querySelector(".user-status")
+        if (icon) {
+          icon.textContent = status === "online" ? "🟢" : "⚫"
+        }
+      }
+    }
+
+    consumer.subscriptions.create("PresenceChannel", {
+      received(data) {
+        if (data.type === "join") {
+          updateUserStatus(data.user, "online")
+        } else if (data.type === "leave") {
+          updateUserStatus(data.user, "offline")
+        }
+      }
+    })
+  })
+</script>

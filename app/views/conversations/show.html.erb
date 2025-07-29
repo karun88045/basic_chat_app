@@ -1,0 +1,53 @@
+<% chatting_with = @conversation.sender == current_user ? @conversation.receiver : @conversation.sender %>
+
+<div class="container py-4">
+  <div class="card shadow rounded-4">
+    <div class="card-header bg-primary text-white rounded-top-4">
+      <h5 class="mb-0">
+        💬 Conversation with
+        <span id="chat-user-status">⚫</span>
+        <span id="chat-user-email"><%= chatting_with.email %></span>
+      </h5>
+    </div>
+
+    <div class="card-body" id="messages" style="height: 400px; overflow-y: auto; background-color: #f9f9f9;">
+      <%= render @messages %>
+    </div>
+
+    <div class="card-footer bg-white">
+      <div class="input-group">
+        <input
+          type="text"
+          id="message-input"
+          class="form-control"
+          placeholder="Type a message..."
+          autocomplete="off"
+        />
+        <button class="btn btn-success" id="send-button">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // ✅ Start the chat channel
+    initConversationChannel(<%= @conversation.id %>);
+
+    // ✅ Setup PresenceChannel to track online status
+    const email = "<%= chatting_with.email %>";
+    const statusEl = document.getElementById("chat-user-status");
+
+    consumer.subscriptions.create("PresenceChannel", {
+      received(data) {
+        if (data.user === email) {
+          if (data.type === "join") {
+            statusEl.textContent = "🟢";
+          } else if (data.type === "leave") {
+            statusEl.textContent = "⚫";
+          }
+        }
+      }
+    });
+  });
+</script>
